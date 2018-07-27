@@ -18,6 +18,8 @@ import java.util.List;
 
 import javax.inject.Singleton;
 
+import rx.Observable;
+
 @Singleton
 public class RecipeManager {
 
@@ -137,4 +139,11 @@ public class RecipeManager {
         return this;
     }
 
+    public Observable<List> getRecipes() {
+        return null;
+    }
+
+    public Observable getRecipeById(int id) {
+        return null;
+    }
 }

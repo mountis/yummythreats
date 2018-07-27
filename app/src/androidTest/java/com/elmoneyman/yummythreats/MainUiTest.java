@@ -13,8 +13,8 @@ import android.view.View;
 import com.elmoneyman.yummythreats.Activities.MainActivity;
 import com.elmoneyman.yummythreats.Dagger.AppComponent;
 import com.elmoneyman.yummythreats.Dagger.AppModule;
-import com.elmoneyman.yummythreats.Dagger.DaggerAppComponent;
-import com.elmoneyman.yummythreats.Dagger.DataModule;
+import com.elmoneyman.yummythreats.FakeData.AppComponentTest;
+import com.elmoneyman.yummythreats.FakeData.DataModuleTest;
 import com.elmoneyman.yummythreats.Model.Recipe;
 import com.elmoneyman.yummythreats.Network.RecipeService;
 
@@ -61,8 +61,8 @@ public class MainUiTest {
         countingIdlingResource = new CountingIdlingResource("countingIdlingResource");
         Instrumentation instrumentation= InstrumentationRegistry.getInstrumentation();
         App app=App.class.cast(instrumentation.getTargetContext().getApplicationContext());
-        AppComponent component= DaggerAppComponent.builder()
-                .dataModule(new DataModule())
+        AppComponentTest component = DaggerAppComponentTest.builder()
+                .dataModuleTest( new DataModuleTest() )
                 .appModule(new AppModule(app))
                 .build();
         appComponent =component;
@@ -72,9 +72,9 @@ public class MainUiTest {
     @Test
     public void loadsRecipesFromNetworkAndShowsAsList() {
         List<Recipe> recipeList = (List<Recipe>) OnSubscribe.class.cast( Recipe.class );
-        when( appComponent.repository()).thenAnswer( new Answer<Observable<List<Recipe>>>() {
+        when( appComponent.service() ).thenAnswer( new Answer<Observable<List<Recipe>>>() {
             @Override
-            public Observable<List<Recipe>> answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public Observable<List<Recipe>> answer(InvocationOnMock invocationOnMock) {
                 countingIdlingResource.increment();
                 return fromCallable(() -> {
                     Thread.sleep(DELAYED_TIMEOUT);
@@ -102,7 +102,7 @@ public class MainUiTest {
                     .check(matches(allOf( TestRecipeMatchesApiData.coloredTextMatch(R.string.servings_label, servings),isDisplayed())));
             if (recipe.getImageUrl() == null) {
                 onView(allOf(withId(R.id.recipe_image), visibleSibling))
-                        .check(matches(allOf( TestRecipeMatchesApiData.drawableMatch(R.drawable.ic_pastry), isDisplayed())));
+                        .check( matches( allOf( TestRecipeMatchesApiData.withDrawable( R.drawable.ic_pastry ), isDisplayed() ) ) );
             }
         }
     }
@@ -110,7 +110,7 @@ public class MainUiTest {
 
     @Test
     public void showsErrorMessageWhenLoadingRecipesFailed(){
-        when( appComponent.repository()).thenReturn( (RecipeService<Recipe>) error(new Exception()) );
+        when( appComponent.service() ).thenReturn( (RecipeService<Recipe>) error( new Exception() ) );
         activityTestRule.launchActivity(null);
 
         onView(withId(R.id.message)).check(matches(allOf(isDisplayed(),
@@ -120,7 +120,7 @@ public class MainUiTest {
 
     @Test
     public void showsErrorMessageWhenGetsEmptyData(){
-        when( appComponent.repository()).thenReturn( (RecipeService<Recipe>) just(null) );
+        when( appComponent.service() ).thenReturn( (RecipeService<Recipe>) just( null ) );
         activityTestRule.launchActivity(null);
 
         onView(withId(R.id.message)).check(matches(allOf(isDisplayed(),

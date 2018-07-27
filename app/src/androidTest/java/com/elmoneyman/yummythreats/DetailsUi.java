@@ -14,10 +14,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.elmoneyman.yummythreats.Activities.DetailsActivity;
-import com.elmoneyman.yummythreats.Dagger.AppComponent;
 import com.elmoneyman.yummythreats.Dagger.AppModule;
-import com.elmoneyman.yummythreats.Dagger.DaggerAppComponent;
-import com.elmoneyman.yummythreats.Dagger.DataModule;
+import com.elmoneyman.yummythreats.FakeData.AppComponentTest;
+import com.elmoneyman.yummythreats.FakeData.DataModuleTest;
+import com.elmoneyman.yummythreats.FakeData.RecipeProviderTest;
 import com.elmoneyman.yummythreats.Model.Recipe;
 import com.elmoneyman.yummythreats.Model.Step;
 import com.elmoneyman.yummythreats.Network.RecipeService;
@@ -42,6 +42,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.elmoneyman.yummythreats.FakeData.RecipeProviderTest.RECIPE_NAME_ONE;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
@@ -71,18 +72,18 @@ public class DetailsUi {
     public void setUp(){
         Instrumentation instrumentation= InstrumentationRegistry.getInstrumentation();
         App app=App.class.cast(instrumentation.getTargetContext().getApplicationContext());
-        AppComponent component= DaggerAppComponent.builder()
-                .dataModule(new DataModule())
+        AppComponentTest component = DaggerAppComponentTest.builder()
+                .dataModuleTest( new DataModuleTest() )
                 .appModule(new AppModule(app))
                 .build();
-        recipeService =component.repository();
+        recipeService = component.service();
         app.setAppComponent(component);
         Intents.init();
     }
 
     @Test
     public void recipeDetail(){
-        Recipe recipe= Recipe.class.cast( recipeService );
+        Recipe recipe = RecipeProviderTest.provideRecipe( RECIPE_NAME_ONE );
         when( recipeService.getRecipeById(eq(EXTRA_ID))).thenReturn(Observable.just(recipe));
         activityTestRule.launchActivity(null);
         Espresso.onView(withId(R.id.scrollView)).perform(swipeDown());
@@ -108,7 +109,7 @@ public class DetailsUi {
 
     @Test
     public void recipeSteps(){
-        Recipe recipe=Recipe.class.cast( recipeService );
+        Recipe recipe = RecipeProviderTest.provideRecipe( RECIPE_NAME_ONE );
         when( recipeService.getRecipeById(eq(EXTRA_ID))).thenReturn(Observable.just(recipe));
         activityTestRule.launchActivity(null);
 

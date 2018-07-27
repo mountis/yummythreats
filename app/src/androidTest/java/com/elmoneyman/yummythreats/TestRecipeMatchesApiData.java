@@ -8,6 +8,7 @@ import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elmoneyman.yummythreats.Utils.RecipeStringUtils;
@@ -54,11 +55,11 @@ public class TestRecipeMatchesApiData {
         };
     }
 
-    static Matcher<View> drawableMatch(final int resourceId){
-        return new BoundedMatcher<View, CircleImageView>(CircleImageView.class) {
+    static Matcher<View> withDrawable(final int resourceId) {
+        return new BoundedMatcher<View, ImageView>( ImageView.class ) {
             @Override
-            protected boolean matchesSafely(CircleImageView item) {
-                return checkDrawablesMatch(item.getDrawable(), ContextCompat.getDrawable(item.getContext(),resourceId));
+            protected boolean matchesSafely(ImageView item) {
+                return drawablesMatch( item.getDrawable(), ContextCompat.getDrawable( item.getContext(), resourceId ) );
             }
 
             @Override
@@ -74,7 +75,7 @@ public class TestRecipeMatchesApiData {
             protected boolean matchesSafely(TextView item) {
                 Drawable match= ContextCompat.getDrawable(item.getContext(),resourceId);
                 for(Drawable drawable:item.getCompoundDrawables()){
-                    if(checkDrawablesMatch(drawable,match)){
+                    if (drawablesMatch( drawable, match )) {
                         return true;
                     }
                 }
@@ -88,7 +89,7 @@ public class TestRecipeMatchesApiData {
         };
     }
 
-    private static boolean checkDrawablesMatch(Drawable drawableA, Drawable drawableB) {
+    private static boolean drawablesMatch(Drawable drawableA, Drawable drawableB) {
         if(drawableA==null||drawableB==null) return false;
         Drawable.ConstantState stateA = drawableA.getConstantState();
         Drawable.ConstantState stateB = drawableB.getConstantState();

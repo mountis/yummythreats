@@ -8,8 +8,8 @@ import com.elmoneyman.yummythreats.Model.Recipe;
 import com.elmoneyman.yummythreats.Network.RecipeService;
 import com.elmoneyman.yummythreats.Utils.BaseSchedulerProvider;
 import com.elmoneyman.yummythreats.Utils.MessageNotificationProvider;
-import com.elmoneyman.yummythreats.Widget.Widget;
 import com.elmoneyman.yummythreats.Widget.Service;
+import com.elmoneyman.yummythreats.Widget.Widget;
 
 import javax.inject.Singleton;
 
@@ -25,7 +25,8 @@ public interface AppComponent {
     void inject(BaseActivity activity);
     void inject(Widget widget);
     void inject(Service widgetService);
-    RecipeService<Recipe> repository();
+
+    RecipeService<Recipe> service();
     BaseSchedulerProvider schedulerProvider();
     MessageNotificationProvider messageProvider();
     RxBus bus();
