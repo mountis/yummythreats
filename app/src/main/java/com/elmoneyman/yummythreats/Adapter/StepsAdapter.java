@@ -5,12 +5,14 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.elmoneyman.yummythreats.Listeners.StepsOnClick;
 import com.elmoneyman.yummythreats.Listeners.RxBus;
+import com.elmoneyman.yummythreats.Listeners.StepsOnClick;
 import com.elmoneyman.yummythreats.Model.Step;
 import com.elmoneyman.yummythreats.R;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,6 +32,10 @@ public class StepsAdapter extends AbstractAdapter<Step>{
         @BindView(R.id.step_short_description)
         TextView shortDescription;
 
+
+        @BindView(R.id.thumbnail_url)
+        ImageView mStepThumbnail;
+
         public StepViewHolder(View itemView){
             super(itemView);
             ButterKnife.bind(this,itemView);
@@ -47,6 +53,12 @@ public class StepsAdapter extends AbstractAdapter<Step>{
         void onBind(){
             Step step=at(getAdapterPosition());
             shortDescription.setText(step.getShortDescription());
+            String imageURL = step.getImageUrl();
+            if (!(imageURL == null || imageURL.isEmpty())) {
+                Picasso.get()
+                        .load( imageURL )
+                        .into( mStepThumbnail );
+            }
             if(highlightedPosition==getAdapterPosition()){
                 itemView.setBackgroundResource(R.drawable.background_selected);
             }else{

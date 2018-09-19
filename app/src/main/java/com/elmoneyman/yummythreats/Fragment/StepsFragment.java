@@ -12,6 +12,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import com.elmoneyman.yummythreats.Listeners.RxBus;
 import com.elmoneyman.yummythreats.Listeners.StepNavigation;
 import com.elmoneyman.yummythreats.Listeners.Visibility;
 import com.elmoneyman.yummythreats.R;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 
@@ -37,6 +39,7 @@ import butterknife.Optional;
 
 import static android.transition.TransitionManager.beginDelayedTransition;
 import static com.elmoneyman.yummythreats.Utils.RecipeConstants.SESSION_TAG;
+import static com.google.android.exoplayer2.ExoPlayerLibraryInfo.TAG;
 
 public class StepsFragment extends BaseFragment
         implements StepsContract.View, ExoPlayback.Callback {
@@ -78,12 +81,20 @@ public class StepsFragment extends BaseFragment
     private boolean isRotated;
     private StepsContract.Presenter presenter;
     private MediaSessionCompat mediaSession;
+    long playbackPosition;
+    private ExoPlayer player;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         playback.setCallback( this );
+
+        if (savedInstanceState != null) {
+            Log.e( TAG, "(saveInstanceState)get current position : " + playbackPosition );
+            playbackPosition = savedInstanceState.getLong( "playback_position" );
+        }
+
         mediaSession = new MediaSessionCompat( getContext(), SESSION_TAG );
         mediaSession.setFlags( MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS );
@@ -95,6 +106,12 @@ public class StepsFragment extends BaseFragment
                         PlaybackStateCompat.ACTION_PLAY_PAUSE );
         mediaSession.setPlaybackState( stateBuilder.build() );
         mediaSession.setCallback( playback.getExoMediaSessionCallback() );
+
+        if (player != null && playbackPosition != 0) {
+            player.seekTo( playbackPosition );
+            player.setPlayWhenReady( true );
+        }
+
     }
 
     @Nullable
@@ -128,6 +145,15 @@ public class StepsFragment extends BaseFragment
     private boolean isPortrait() {
         return getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle currentState) {
+
+        if (player != null) {
+            currentState.putLong( "playback_position", player.getCurrentPosition() );
+        }
+    }
+
 
     @Optional
     @OnClick(R.id.step_next)
